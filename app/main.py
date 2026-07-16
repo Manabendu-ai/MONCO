@@ -1,8 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 import numpy as np
 
-from predictor import model, CLASS_NAMES
-from utils import preprocess_image
+from .predictor import model, CLASS_NAMES
+from .utils import preprocess_image
 
 app = FastAPI(title="MONCO API")
 
