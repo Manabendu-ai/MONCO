@@ -10,9 +10,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------------------------------------------------------------------------
-# Custom styling
-# ---------------------------------------------------------------------------
 st.markdown(
     """
     <style>
@@ -20,7 +17,9 @@ st.markdown(
             background: #0f172a;
         }
 
-        #MainMenu, header, footer { visibility: hidden; }
+        #MainMenu { visibility: hidden; }
+        footer { visibility: hidden; }
+        header[data-testid="stHeader"] { background: transparent; }
 
         .block-container {
             padding-top: 2.5rem;
@@ -110,9 +109,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------------------------------------------------------------------
-# Sidebar
-# ---------------------------------------------------------------------------
 with st.sidebar:
     st.markdown("### About MONCO")
     st.write(
@@ -131,15 +127,9 @@ with st.sidebar:
     st.markdown("---")
     st.caption("Owner: Manabendu Karfa")
 
-# ---------------------------------------------------------------------------
-# Header
-# ---------------------------------------------------------------------------
 st.markdown('<div class="monco-title">MONCO</div>', unsafe_allow_html=True)
 st.markdown('<div class="monco-subtitle">AI-Powered Brain Tumor Detection</div>', unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# Upload + preview + predict, all inside one real container
-# ---------------------------------------------------------------------------
 predict_clicked = False
 
 with st.container(border=True):
@@ -153,9 +143,6 @@ with st.container(border=True):
 
         predict_clicked = st.button("Predict")
 
-# ---------------------------------------------------------------------------
-# Prediction
-# ---------------------------------------------------------------------------
 if uploaded_file and predict_clicked:
     files = {
         "file": (
@@ -189,7 +176,5 @@ if uploaded_file and predict_clicked:
         else:
             st.error("Prediction failed. Please check that the API server is running.")
 
-# ---------------------------------------------------------------------------
-# Footer
-# ---------------------------------------------------------------------------
+
 st.markdown('<div class="monco-footer">Owner: Manabendu Karfa</div>', unsafe_allow_html=True)
