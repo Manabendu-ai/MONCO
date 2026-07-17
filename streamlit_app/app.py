@@ -57,17 +57,33 @@ st.markdown(
 
         div.stButton > button {
             width: 100%;
+            min-height: 2.8rem;
             background: #2563eb;
             color: white;
             font-weight: 600;
             font-size: 0.95rem;
-            padding: 0.6rem 0;
+            line-height: 1.2;
+            padding: 0.6rem 1.2rem;
             border-radius: 8px;
             border: none;
+            white-space: nowrap;
+        }
+        div.stButton > button p {
+            font-size: 0.95rem;
+            white-space: nowrap;
         }
         div.stButton > button:hover {
             background: #1d4ed8;
             color: white;
+        }
+
+        .monco-footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 2.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #1e293b;
         }
 
         .result-label {
@@ -112,6 +128,8 @@ with st.sidebar:
     )
     st.markdown("---")
     st.caption("For research and educational use only. Not a substitute for professional medical diagnosis.")
+    st.markdown("---")
+    st.caption("Owner: Manabendu Karfa")
 
 # ---------------------------------------------------------------------------
 # Header
@@ -170,3 +188,8 @@ if uploaded_file and predict_clicked:
 
         else:
             st.error("Prediction failed. Please check that the API server is running.")
+
+# ---------------------------------------------------------------------------
+# Footer
+# ---------------------------------------------------------------------------
+st.markdown('<div class="monco-footer">Owner: Manabendu Karfa</div>', unsafe_allow_html=True)
