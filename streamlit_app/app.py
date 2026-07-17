@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from PIL import Image
 
-API_URL = "http://localhost:8000/predict"
+API_URL = "https://monco-2.onrender.com/predict"
 
 st.set_page_config(
     page_title="MONCO",
