@@ -6,7 +6,6 @@ API_URL = "http://localhost:8000/predict"
 
 st.set_page_config(
     page_title="MONCO",
-    page_icon="🧠",
     layout="centered",
     initial_sidebar_state="expanded"
 )
@@ -17,94 +16,78 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-        /* Overall app background */
         .stApp {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            background: #0f172a;
         }
 
-        /* Hide default streamlit chrome */
         #MainMenu, header, footer { visibility: hidden; }
 
-        /* Title block */
-        .monco-header {
-            text-align: center;
-            padding: 1.2rem 0 0.2rem 0;
+        .block-container {
+            padding-top: 2.5rem;
+            max-width: 720px;
         }
+
         .monco-title {
-            font-size: 2.6rem;
-            font-weight: 800;
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-            letter-spacing: 0.05em;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            text-align: center;
+            margin-bottom: 0.1rem;
+            letter-spacing: 0.03em;
         }
         .monco-subtitle {
+            text-align: center;
             color: #94a3b8;
-            font-size: 1.05rem;
-            margin-top: 0.2rem;
+            font-size: 1rem;
+            margin-bottom: 2rem;
         }
 
-        /* Card containers */
-        .monco-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-        }
-
-        /* Uploader tweaks */
         [data-testid="stFileUploader"] {
             background: #1e293b;
-            border: 1.5px dashed #475569;
-            border-radius: 14px;
-            padding: 0.8rem;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 0.6rem;
         }
 
-        /* Predict button */
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            background: #1e293b;
+            border: 1px solid #334155 !important;
+            border-radius: 12px;
+        }
+
         div.stButton > button {
             width: 100%;
-            background: linear-gradient(90deg, #38bdf8, #6366f1);
+            background: #2563eb;
             color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            padding: 0.7rem 0;
-            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.6rem 0;
+            border-radius: 8px;
             border: none;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
         div.stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35);
+            background: #1d4ed8;
             color: white;
         }
 
-        /* Result badges */
-        .result-box {
-            border-radius: 14px;
-            padding: 1.1rem 1.4rem;
-            font-size: 1.15rem;
+        .result-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            margin-bottom: 0.2rem;
+        }
+        .result-value {
+            font-size: 1.4rem;
             font-weight: 700;
-            text-align: center;
-            margin-top: 0.6rem;
         }
-        .result-tumor {
-            background: rgba(248, 113, 113, 0.12);
-            border: 1px solid #f87171;
-            color: #fca5a5;
-        }
-        .result-clear {
-            background: rgba(74, 222, 128, 0.12);
-            border: 1px solid #4ade80;
-            color: #86efac;
-        }
+        .result-tumor { color: #f87171; }
+        .result-clear { color: #4ade80; }
 
         .confidence-label {
             color: #cbd5e1;
-            font-size: 0.95rem;
-            margin-top: 0.6rem;
+            font-size: 0.9rem;
+            margin: 0.8rem 0 0.3rem;
         }
     </style>
     """,
@@ -115,7 +98,7 @@ st.markdown(
 # Sidebar
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 🧠 About MONCO")
+    st.markdown("### About MONCO")
     st.write(
         "MONCO analyzes MRI brain scans and flags potential tumor regions "
         "using a trained deep learning model."
@@ -124,46 +107,33 @@ with st.sidebar:
     st.markdown("**How to use**")
     st.markdown(
         "1. Upload an MRI scan (JPG/PNG)\n"
-        "2. Click **Predict**\n"
-        "3. Review the result & confidence score"
+        "2. Click Predict\n"
+        "3. Review the result and confidence score"
     )
     st.markdown("---")
-    st.caption("⚠️ For research/educational use only. Not a substitute for professional medical diagnosis.")
+    st.caption("For research and educational use only. Not a substitute for professional medical diagnosis.")
 
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-st.markdown(
-    """
-    <div class="monco-header">
-        <p class="monco-title">MONCO</p>
-        <p class="monco-subtitle">🧠 AI-Powered Brain Tumor Detection</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.write("")
+st.markdown('<div class="monco-title">MONCO</div>', unsafe_allow_html=True)
+st.markdown('<div class="monco-subtitle">AI-Powered Brain Tumor Detection</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
-# Upload card
+# Upload + preview + predict, all inside one real container
 # ---------------------------------------------------------------------------
-st.markdown('<div class="monco-card">', unsafe_allow_html=True)
-uploaded_file = st.file_uploader(
-    "Upload MRI Scan",
-    type=["jpg", "jpeg", "png"]
-)
+predict_clicked = False
 
-if uploaded_file:
-    image = Image.open(uploaded_file)
+with st.container(border=True):
+    uploaded_file = st.file_uploader("Upload MRI Scan", type=["jpg", "jpeg", "png"])
 
-    # Center a smaller preview instead of full-width
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.image(image, caption="Uploaded MRI", width=280)
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.image(image, caption="Uploaded MRI", width=240)
 
-    predict_clicked = st.button("🔍 Predict")
-st.markdown('</div>', unsafe_allow_html=True)
+        predict_clicked = st.button("Predict")
 
 # ---------------------------------------------------------------------------
 # Prediction
@@ -183,29 +153,20 @@ if uploaded_file and predict_clicked:
         except requests.exceptions.RequestException:
             response = None
 
-    st.markdown('<div class="monco-card">', unsafe_allow_html=True)
+    with st.container(border=True):
+        if response is not None and response.status_code == 200:
+            data = response.json()
+            prediction = str(data.get("prediction", "Unknown"))
+            confidence = data.get("confidence", 0)
 
-    if response is not None and response.status_code == 200:
-        data = response.json()
-        prediction = data.get("prediction", "Unknown")
-        confidence = data.get("confidence", 0)
+            is_clear = any(word in prediction.lower() for word in ["no", "clear", "normal"])
+            value_class = "result-clear" if is_clear else "result-tumor"
 
-        is_tumor = "no" not in str(prediction).lower() and "clear" not in str(prediction).lower() and "normal" not in str(prediction).lower()
-        box_class = "result-tumor" if is_tumor else "result-clear"
-        icon = "⚠️" if is_tumor else "✅"
+            st.markdown('<div class="result-label">Prediction</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-value {value_class}">{prediction}</div>', unsafe_allow_html=True)
 
-        st.markdown(
-            f'<div class="result-box {box_class}">{icon} Prediction: {prediction}</div>',
-            unsafe_allow_html=True
-        )
+            st.markdown(f'<div class="confidence-label">Confidence: {confidence}%</div>', unsafe_allow_html=True)
+            st.progress(min(int(confidence), 100) / 100)
 
-        st.markdown(
-            f'<p class="confidence-label">Confidence: {confidence}%</p>',
-            unsafe_allow_html=True
-        )
-        st.progress(min(int(confidence), 100) / 100)
-
-    else:
-        st.error("❌ Prediction failed. Please check that the API server is running.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.error("Prediction failed. Please check that the API server is running.")
