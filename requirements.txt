@@ -1,0 +1,13 @@
+pandas
+numpy
+matplotlib
+scikit-learn
+seaborn
+fastapi
+uvicorn
+streamlit
+tensorflow[and-cuda]
+pillow
+python-multipart
+pydantic
+h5py
