@@ -1,12 +1,7 @@
-pandas
-numpy
-matplotlib
-scikit-learn
-seaborn
 fastapi
 uvicorn
-streamlit
-tensorflow[and-cuda]
+tensorflow==2.21.0
+numpy
 pillow
 python-multipart
 pydantic
