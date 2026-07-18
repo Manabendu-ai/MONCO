@@ -1,12 +1,13 @@
 # 🧠 MONCO — Brain Tumor Detection using Deep Learning
 
-MONCO is an end-to-end deep learning application that classifies brain MRI scans into four categories — **glioma**, **meningioma**, **pituitary tumor**, or **no tumor** — using transfer learning on **VGG16**. The project covers the full pipeline: data preprocessing, model training and evaluation, a **FastAPI** inference backend, and a **Streamlit** web interface for real-time predictions.
+MONCO is an end-to-end deep learning application that classifies brain MRI scans into four categories — **glioma**, **meningioma**, **pituitary tumor**, or **no tumor** — using transfer learning on **VGG16**, and now generates a **natural language AI explanation** of each result. The project covers the full pipeline: data preprocessing, model training and evaluation, a **FastAPI** inference backend, and a modular **Streamlit** web interface for real-time predictions.
 
 <p align="center">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white">
   <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-Keras-FF6F00?logo=tensorflow&logoColor=white">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white">
   <img alt="Streamlit" src="https://img.shields.io/badge/Streamlit-Frontend-FF4B4B?logo=streamlit&logoColor=white">
+  <img alt="Plotly" src="https://img.shields.io/badge/Plotly-Charts-3F4F75?logo=plotly&logoColor=white">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
@@ -14,7 +15,7 @@ MONCO is an end-to-end deep learning application that classifies brain MRI scans
 
 ## 📌 Overview
 
-MRI-based brain tumor diagnosis is time-consuming and requires expert radiological review. MONCO assists this process by using a convolutional neural network built on top of **VGG16 (ImageNet weights)** to classify an uploaded MRI scan into one of four classes, along with a confidence score — served through a simple web app.
+MRI-based brain tumor diagnosis is time-consuming and requires expert radiological review. MONCO assists this process by using a convolutional neural network built on top of **VGG16 (ImageNet weights)** to classify an uploaded MRI scan into one of four classes, along with a confidence score, a full class-probability breakdown, and an **AI-generated explanation** of what the prediction means — all served through a clean web dashboard.
 
 > ⚠️ **Disclaimer:** MONCO is a research and educational project. It is **not** a certified medical device and should **never** be used as a substitute for professional diagnosis.
 
@@ -25,8 +26,13 @@ MRI-based brain tumor diagnosis is time-consuming and requires expert radiologic
 - **Transfer learning** with a frozen VGG16 backbone plus a custom classification head
 - Real-time image augmentation (brightness/contrast jitter) during training
 - Batch-wise data generator to handle large MRI datasets without loading everything into memory
-- **FastAPI** backend exposing a `/predict` REST endpoint
-- **Streamlit** frontend for uploading a scan and viewing the prediction and confidence instantly
+- **FastAPI** backend exposing a `/predict` REST endpoint that returns the prediction, confidence, full per-class probability distribution, and an AI-generated natural language explanation
+- **Streamlit** dashboard, split into modular components, for uploading a scan and viewing:
+  - The predicted class as a color-coded badge
+  - A confidence score and progress bar
+  - An interactive **Plotly** probability distribution chart across all four classes
+  - An expandable **AI Explanation** panel rendered from the backend's Markdown output
+- Friendly, non-crashing error handling for backend downtime, timeouts, and invalid responses
 - Full evaluation suite — classification report, confusion matrix, and multi-class ROC/AUC curves
 
 ---
@@ -85,6 +91,7 @@ MONCO/
 │   ├── __init__.py
 │   ├── main.py                # API entrypoint, /predict route
 │   ├── predictor.py           # Model loading + inference logic
+│   ├── explainer.py            # AI-generated natural language explanation logic
 │   ├── schemas.py              # Pydantic request/response schemas
 │   └── utils.py                # Image preprocessing helpers
 │
@@ -100,8 +107,11 @@ MONCO/
 │
 ├── streamlit_app/
 │   ├── assets/
-│   ├── __init__.py
-│   └── app.py                   # Streamlit frontend
+│   ├── app.py                   # Main entrypoint - orchestrates the modules below
+│   ├── config.py                # API URL, class labels, colors, emojis
+│   ├── api_client.py            # Backend communication + error handling
+│   ├── charts.py                 # Plotly probability distribution chart
+│   └── ui_components.py          # Styling and reusable UI render functions
 │
 ├── main.ipynb                   # Full training & evaluation notebook
 └── .gitignore
@@ -113,7 +123,8 @@ MONCO/
 
 - **Deep Learning:** TensorFlow, Keras, VGG16
 - **Backend:** FastAPI
-- **Frontend:** Streamlit
+- **Explanation Generation:** LLM-based reasoning module for natural language prediction explanations
+- **Frontend:** Streamlit, Plotly
 - **Data & Evaluation:** NumPy, scikit-learn, Seaborn, Matplotlib
 - **Image Processing:** Pillow (PIL)
 
@@ -175,8 +186,15 @@ curl -X POST "http://localhost:8000/predict" \
 **Example response:**
 ```json
 {
-  "prediction": "meningioma",
-  "confidence": 98.22
+  "prediction": "glioma",
+  "confidence": 99.89,
+  "probabilities": {
+    "glioma": 99.89,
+    "pituitary": 0.03,
+    "meningioma": 0.07,
+    "notumor": 0.01
+  },
+  "explanation": "## Prediction\n\nThe classifier predicts that the brain MRI shows a high probability of glioma...\n\n## Important Disclaimer\n\nThis AI-generated explanation is for informational purposes only and should not be considered a medical diagnosis."
 }
 ```
 
@@ -186,8 +204,9 @@ curl -X POST "http://localhost:8000/predict" \
 
 1. The uploaded image is resized to 128×128 and converted to a NumPy array.
 2. The array is passed through the trained VGG16-based model.
-3. The class with the highest softmax probability is selected as the prediction.
-4. If the predicted class is `notumor`, the result is shown as **"No Tumor Detected"**; otherwise it's shown as **"Tumor: <class name>"**, along with the confidence percentage.
+3. The class with the highest softmax probability is selected as the prediction, alongside the full probability distribution across all four classes.
+4. An LLM-based reasoning step generates a Markdown-formatted natural language explanation covering what the prediction means, how confident the model is, and a disclaimer to consult a medical professional.
+5. If the predicted class is `notumor`, the result is shown as **"No Tumor Detected"**; otherwise it's shown as **"Tumor: <class name>"**, along with the confidence percentage, probability chart, and AI explanation.
 
 ---
 
@@ -197,6 +216,7 @@ curl -X POST "http://localhost:8000/predict" \
 - Add Grad-CAM visualizations to highlight tumor regions on the MRI
 - Containerize the app with Docker for easier deployment
 - Add authentication and request logging to the API
+- Add prediction history and downloadable PDF reports
 - Expand the dataset with more diverse MRI sources to improve generalization
 
 ---
