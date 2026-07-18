@@ -1,5 +1,3 @@
-from PIL import Image
-
 from app.model.predictor import Predictor
 from app.llm.service import LLMService
 
@@ -10,18 +8,16 @@ class PredictionService:
         self.predictor = Predictor()
         self.llm = LLMService()
 
-    def predict(self, image: Image.Image):
+    def predict(self, image_bytes: bytes):
 
-        # CNN Prediction
-        prediction_result = self.predictor.predict(image)
+        prediction = self.predictor.predict(image_bytes)
 
-        # LLM Explanation
         explanation = self.llm.generate_explanation(
-            prediction=prediction_result["prediction"],
-            confidence=prediction_result["confidence"],
-            probabilities=prediction_result["probabilities"],
+            prediction=prediction["prediction"],
+            confidence=prediction["confidence"],
+            probabilities=prediction["probabilities"]
         )
 
-        prediction_result["explanation"] = explanation
+        prediction["explanation"] = explanation
 
-        return prediction_result
+        return prediction
