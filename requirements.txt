@@ -6,3 +6,4 @@ pillow
 python-multipart
 pydantic
 h5py
+ollama

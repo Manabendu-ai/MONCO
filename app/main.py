@@ -1,33 +1,17 @@
-from fastapi import FastAPI, UploadFile, File
-import numpy as np
+from fastapi import FastAPI
 
-from .predictor import model, CLASS_NAMES
-from .utils import preprocess_image
+from app.routes.predict import router as prediction_router
 
-app = FastAPI(title="MONCO API")
+app = FastAPI(
+    title="MONCO API",
+    version="1.1.0"
+)
+
+app.include_router(prediction_router)
 
 
 @app.get("/")
 def home():
     return {
         "message": "MONCO Brain Tumor Detection API"
-    }
-
-
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-
-    contents = await file.read()
-
-    image = preprocess_image(contents)
-
-    prediction = model.predict(image)
-
-    index = np.argmax(prediction)
-
-    confidence = float(np.max(prediction))
-
-    return {
-        "prediction": CLASS_NAMES[index],
-        "confidence": round(confidence * 100, 2)
     }
