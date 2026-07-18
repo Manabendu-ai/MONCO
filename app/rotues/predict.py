@@ -1,11 +1,8 @@
-from io import BytesIO
-
-from fastapi import APIRouter, File, UploadFile
-from PIL import Image
+from fastapi import APIRouter, UploadFile, File
 
 from app.services.prediction_service import PredictionService
 
-router = APIRouter()
+router = APIRouter(tags=["Prediction"])
 
 prediction_service = PredictionService()
 
@@ -15,8 +12,4 @@ async def predict(file: UploadFile = File(...)):
 
     image_bytes = await file.read()
 
-    image = Image.open(BytesIO(image_bytes))
-
-    result = prediction_service.predict(image)
-
-    return result
+    return prediction_service.predict(image_bytes)
