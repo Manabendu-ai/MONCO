@@ -4,7 +4,7 @@ from app.routes.predict import router as prediction_router
 
 app = FastAPI(
     title="MONCO API",
-    version="1.0.0"
+    version="1.1.0"
 )
 
 app.include_router(prediction_router)
