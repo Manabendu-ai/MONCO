@@ -87,34 +87,68 @@ The confusion matrix and ROC curve are available in the training notebook (`main
 
 ```
 MONCO/
-├── app/                      # FastAPI backend
+├── .devcontainer/
+│   └── devcontainer.json        # Dev container config for consistent environments
+│
+├── app/                         # FastAPI backend
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── settings.py           # App-wide settings (paths, model config, Ollama host/model)
+│   │
+│   ├── llm/
+│   │   ├── __init__.py
+│   │   ├── prompt_builder.py     # Builds the prompt sent to the LLM for each prediction
+│   │   └── service.py             # Calls Ollama (gemma3:4b) and returns the explanation
+│   │
+│   ├── model/
+│   │   ├── __init__.py
+│   │   ├── loader.py              # Loads the trained Keras/VGG16 model
+│   │   └── predictor.py           # Runs inference and returns class + probabilities
+│   │
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   └── predict.py             # /predict route definition
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── prediction_service.py  # Orchestrates prediction + LLM explanation for a request
+│   │
 │   ├── __init__.py
-│   ├── main.py                # API entrypoint, /predict route
-│   ├── predictor.py           # Model loading + inference logic
-│   ├── explainer.py            # AI-generated natural language explanation logic
-│   ├── schemas.py              # Pydantic request/response schemas
-│   └── utils.py                # Image preprocessing helpers
+│   ├── main.py                    # FastAPI entrypoint
+│   ├── schemas.py                 # Pydantic request/response schemas
+│   └── utils.py                   # Image preprocessing helpers
 │
 ├── dataset/
 │   └── data/
-│       ├── Training/           # Training images, per-class folders
-│       └── Testing/            # Testing images, per-class folders
+│       ├── Testing/               # Testing images, per-class folders
+│       │   ├── glioma/
+│       │   ├── meningioma/
+│       │   ├── notumor/
+│       │   └── pituitary/
+│       └── Training/              # Training images, per-class folders
+│           ├── glioma/
+│           ├── meningioma/
+│           ├── notumor/
+│           └── pituitary/
 │
 ├── model/
-│   ├── classes.json            # Class label mapping
-│   ├── monco.h5                 # Saved model (HDF5 format)
-│   └── monco.keras              # Saved model (Keras native format)
+│   ├── classes.json               # Class label mapping
+│   ├── monco.h5                    # Saved model (HDF5 format)
+│   └── monco.keras                 # Saved model (Keras native format)
 │
 ├── streamlit_app/
 │   ├── assets/
-│   ├── app.py                   # Main entrypoint - orchestrates the modules below
-│   ├── config.py                # API URL, class labels, colors, emojis
-│   ├── api_client.py            # Backend communication + error handling
-│   ├── charts.py                 # Plotly probability distribution chart
-│   └── ui_components.py          # Styling and reusable UI render functions
+│   ├── __init__.py
+│   ├── app.py                     # Main entrypoint - orchestrates the modules below
+│   ├── config.py                   # API URL, class labels, colors, emojis
+│   ├── api_client.py                # Backend communication + error handling
+│   ├── charts.py                     # Plotly probability distribution chart
+│   └── ui_components.py               # Styling and reusable UI render functions
 │
-├── main.ipynb                   # Full training & evaluation notebook
-└── .gitignore
+├── main.ipynb                     # Full training & evaluation notebook
+├── .gitattributes
+├── .gitignore
+└── .python-version
 ```
 
 ---
@@ -123,7 +157,7 @@ MONCO/
 
 - **Deep Learning:** TensorFlow, Keras, VGG16
 - **Backend:** FastAPI
-- **Explanation Generation:** LLM-based reasoning module for natural language prediction explanations
+- **Explanation Generation:** [Ollama](https://ollama.com) running **gemma3:4b** locally for natural language prediction explanations
 - **Frontend:** Streamlit, Plotly
 - **Data & Evaluation:** NumPy, scikit-learn, Seaborn, Matplotlib
 - **Image Processing:** Pillow (PIL)
@@ -131,6 +165,15 @@ MONCO/
 ---
 
 ## 🚀 Getting Started
+
+### 0. Prerequisite: Ollama
+
+The AI explanation feature calls a local **Ollama** instance running **gemma3:4b**. Install Ollama, then pull and serve the model:
+
+```bash
+ollama pull gemma3:4b
+ollama serve
+```
 
 ### 1. Clone the repository
 
@@ -205,7 +248,7 @@ curl -X POST "http://localhost:8000/predict" \
 1. The uploaded image is resized to 128×128 and converted to a NumPy array.
 2. The array is passed through the trained VGG16-based model.
 3. The class with the highest softmax probability is selected as the prediction, alongside the full probability distribution across all four classes.
-4. An LLM-based reasoning step generates a Markdown-formatted natural language explanation covering what the prediction means, how confident the model is, and a disclaimer to consult a medical professional.
+4. `prompt_builder.py` constructs a prompt from the prediction and confidence, which `llm/service.py` sends to a locally running **Ollama** instance (**gemma3:4b**). The model returns a Markdown-formatted natural language explanation covering what the prediction means, how confident the model is, and a disclaimer to consult a medical professional.
 5. If the predicted class is `notumor`, the result is shown as **"No Tumor Detected"**; otherwise it's shown as **"Tumor: <class name>"**, along with the confidence percentage, probability chart, and AI explanation.
 
 ---
