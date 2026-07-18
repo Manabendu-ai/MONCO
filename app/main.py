@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .rotues.predict import router as prediction_router
+from app.routes.predict import router as prediction_router
 
 app = FastAPI(
     title="MONCO API",
