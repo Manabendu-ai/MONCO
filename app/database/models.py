@@ -28,4 +28,29 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class PredictionHistory(Base):
+    __tablename__ = "prediction_history"
 
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    image_path = Column(String(500))
+
+    prediction = Column(String(100))
+
+    confidence = Column(Float)
+
+    glioma_probability = Column(Float)
+
+    meningioma_probability = Column(Float)
+
+    pituitary_probability = Column(Float)
+
+    notumor_probability = Column(Float)
+
+    llm_explanation = Column(Text)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
