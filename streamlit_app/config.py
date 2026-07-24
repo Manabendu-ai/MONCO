@@ -4,7 +4,7 @@ Keeping constants here means the API endpoint, class labels, colors, and
 emojis can be changed in one place without touching UI or logic code.
 """
 
-API_URL = "https://monco-2.onrender.com/predict"
+API_URL = "http://localhost:8000/predict"
 REQUEST_TIMEOUT = 30  # seconds
 
 # Metadata per prediction class: display label, emoji badge, and accent color.
