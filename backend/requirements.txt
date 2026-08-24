@@ -9,3 +9,4 @@ ollama
 sqlalchemy
 pymysql
 python-dotenv
+huggingface-hub
