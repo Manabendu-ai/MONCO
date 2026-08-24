@@ -13,3 +13,4 @@ sqlalchemy
 python-dotenv
 huggingface-hub
 cloudinary
+groq
