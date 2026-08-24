@@ -1,7 +1,7 @@
 import os
 import cloudinary
 import cloudinary.uploader
-
+from app.config import cloudinary_config
 
 class CloudinaryService:
 
