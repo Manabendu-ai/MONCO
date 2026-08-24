@@ -4,7 +4,7 @@ Keeping constants here means the API endpoint, class labels, colors, and
 emojis can be changed in one place without touching UI or logic code.
 """
 
-BACKEND_BASE_URL = "https://monco-3.onrender.com"
+BACKEND_BASE_URL = " http://0.0.0.0:9009"
 API_URL = f"{BACKEND_BASE_URL}/predict"
 HISTORY_API_URL = f"{BACKEND_BASE_URL}/history"
 REQUEST_TIMEOUT = 30  # seconds

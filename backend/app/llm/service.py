@@ -1,6 +1,6 @@
 import os
 
-from huggingface_hub import InferenceClient
+from groq import Groq
 
 from app.llm.prompt_builder import build_explanation_prompt
 
@@ -9,12 +9,12 @@ class LLMService:
 
     def __init__(
         self,
-        model: str = "deepseek-ai/DeepSeek-V4-Flash-0731:baseten",
+        model: str = "openai/gpt-oss-20b",
     ):
         self.model = model
 
-        self.client = InferenceClient(
-            api_key=os.getenv("HF_TOKEN"),
+        self.client = Groq(
+            api_key=os.getenv("GROQ_API_KEY"),
         )
 
     def generate_explanation(
@@ -47,7 +47,7 @@ class LLMService:
                 },
             ],
             temperature=0.2,
-            max_tokens=400,
+            max_completion_tokens=400,
         )
 
         return response.choices[0].message.content.strip()
