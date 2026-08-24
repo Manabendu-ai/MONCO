@@ -23,7 +23,11 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(prediction_router)
 app.include_router(history_router)
 
-
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok"
+    }
 @app.get("/")
 def home():
     return {
