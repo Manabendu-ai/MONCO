@@ -12,3 +12,4 @@ plotly
 sqlalchemy
 python-dotenv
 huggingface-hub
+cloudinary

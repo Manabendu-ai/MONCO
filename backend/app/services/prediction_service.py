@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.model.predictor import Predictor
 from app.llm.service import LLMService
-from app.services.file_service import FileService
+from app.services.cloudinary_service import CloudinaryService
 from app.services.history_service import HistoryService
 
 
@@ -33,8 +33,10 @@ class PredictionService:
         prediction["explanation"] = explanation
 
         # Persist the uploaded image + result so it shows up in history.
-        image_path = FileService.save_image(image_bytes, original_filename)
-
+        image_path = CloudinaryService.upload_image(
+            image_bytes,
+            original_filename
+        )
         history = HistoryService.save_prediction(
             db=db,
             image_path=image_path,
