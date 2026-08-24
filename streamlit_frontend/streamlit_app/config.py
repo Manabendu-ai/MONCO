@@ -4,7 +4,7 @@ Keeping constants here means the API endpoint, class labels, colors, and
 emojis can be changed in one place without touching UI or logic code.
 """
 
-BACKEND_BASE_URL = "http://localhost:8000"
+BACKEND_BASE_URL = "http://localhost:9009"
 API_URL = f"{BACKEND_BASE_URL}/predict"
 HISTORY_API_URL = f"{BACKEND_BASE_URL}/history"
 REQUEST_TIMEOUT = 30  # seconds
