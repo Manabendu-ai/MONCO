@@ -9,7 +9,7 @@ class LLMService:
 
     def __init__(
         self,
-        model: str = "openai/gpt-oss-20b",
+        model: str = "openai/gpt-oss-120b",
     ):
         self.model = model
 
@@ -46,8 +46,14 @@ class LLMService:
                     "content": prompt,
                 },
             ],
-            temperature=0.2,
-            max_completion_tokens=400,
+            temperature=0.4,
+            max_completion_tokens=800,
         )
 
-        return response.choices[0].message.content.strip()
+        print("LLM RESPONSE:", response)
+
+        content = response.choices[0].message.content
+
+        print("LLM CONTENT:", content)
+
+        return content.strip() if content else "AI explanation could not be generated."
