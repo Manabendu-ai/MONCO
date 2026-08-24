@@ -1,6 +1,6 @@
 <p style="text-align:center;" align="center"><picture>
 <img src="assests/logo.png"
-alt="Monco Logo" width="20%" /></picture><br /><br /></p>
+alt="Monco Logo" width="40%" /></picture><br /><br /></p>
 <p align="center">
 
 <p align="center">
