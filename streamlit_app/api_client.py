@@ -99,8 +99,9 @@ def delete_history_item(history_id: int) -> None:
 
 
 def history_image_url(image_path: str) -> str:
-    """Build a full URL for an image path returned by the backend
+    """Return the correct URL for local or Cloudinary images."""
 
-    (e.g. 'uploads/xyz.jpg' -> 'http://localhost:8000/uploads/xyz.jpg').
-    """
+    if image_path.startswith(("http://", "https://")):
+        return image_path
+
     return f"{BACKEND_BASE_URL}/{image_path.lstrip('/')}"
