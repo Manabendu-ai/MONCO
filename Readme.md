@@ -1,6 +1,6 @@
-# 🧠 MONCO — Brain Tumor Detection using Deep Learning
+# MONCO — Brain Tumor Detection using Deep Learning
 
-MONCO is an end-to-end deep learning application that classifies brain MRI scans into four categories — **glioma**, **meningioma**, **pituitary tumor**, or **no tumor** — using transfer learning on **VGG16**, generates a **natural language AI explanation** of each result, and keeps a **persistent prediction history**. The project covers the full pipeline: data preprocessing, model training and evaluation, a **FastAPI** inference backend backed by **MySQL**, and a modular **Streamlit** web interface for real-time predictions and browsing past scans.
+MONCO is an end-to-end deep learning application that classifies brain MRI scans into four categories — glioma, meningioma, pituitary tumor, or no tumor — using transfer learning on VGG16, generates a natural language AI explanation of each result, and keeps a persistent prediction history. The project covers the full pipeline: data preprocessing, model training and evaluation, a FastAPI inference backend backed by MySQL, and a modular Streamlit web interface for real-time predictions and browsing past scans.
 
 <p align="center">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white">
@@ -15,44 +15,47 @@ MONCO is an end-to-end deep learning application that classifies brain MRI scans
 
 ---
 
-## 📌 Overview
+## Overview
 
-MRI-based brain tumor diagnosis is time-consuming and requires expert radiological review. MONCO assists this process by using a convolutional neural network built on top of **VGG16 (ImageNet weights)** to classify an uploaded MRI scan into one of four classes, along with a confidence score, a full class-probability breakdown, and an **AI-generated explanation** of what the prediction means. Every scan is saved to a **MySQL** database via **SQLAlchemy**, so past uploads, predictions, and explanations can be revisited later — all served through a clean web dashboard.
+MRI-based brain tumor diagnosis is time-consuming and requires expert radiological review. MONCO assists this process by using a convolutional neural network built on top of VGG16 (ImageNet weights) to classify an uploaded MRI scan into one of four classes, along with a confidence score, a full class-probability breakdown, and an AI-generated explanation of what the prediction means. Every scan is saved to a MySQL database via SQLAlchemy, so past uploads, predictions, and explanations can be revisited later, all served through a clean web dashboard.
 
-> ⚠️ **Disclaimer:** MONCO is a research and educational project. It is **not** a certified medical device and should **never** be used as a substitute for professional diagnosis.
+**Disclaimer:** MONCO is a research and educational project. It is not a certified medical device and should never be used as a substitute for professional diagnosis.
+
+**Live Demo:** [monco-ai.streamlit.app](https://monco-ai.streamlit.app/)
 
 ---
 
-## 🎯 Key Features
+## Key Features
 
-- **Transfer learning** with a frozen VGG16 backbone plus a custom classification head
+- Transfer learning with a frozen VGG16 backbone plus a custom classification head
 - Real-time image augmentation (brightness/contrast jitter) during training
 - Batch-wise data generator to handle large MRI datasets without loading everything into memory
-- **FastAPI** backend exposing:
+- FastAPI backend exposing:
   - `POST /predict` — returns the prediction, confidence, full per-class probability distribution, and an AI-generated natural language explanation
   - `GET /history` — paginated list of past predictions
   - `GET /history/{id}` and `DELETE /history/{id}` — fetch or remove a single record
-- **Prediction history** persisted in **MySQL** via **SQLAlchemy** — every scan's image, prediction, per-class probabilities, and AI explanation are stored for later review
-- **Streamlit** dashboard, split into modular components, with two tabs:
+- Prediction history persisted in MySQL via SQLAlchemy — every scan's image, prediction, per-class probabilities, and AI explanation are stored for later review
+- Persistent image storage via Cloudinary — uploaded MRI scans are stored as secure, permanent URLs instead of on local disk, so history remains intact across redeploys and restarts
+- Streamlit dashboard, split into modular components, with two tabs:
   - **Analyze** — upload a scan and view:
     - The predicted class as a color-coded badge
     - A confidence score and progress bar
-    - An interactive **Plotly** probability distribution chart across all four classes
-    - An expandable **AI Explanation** panel rendered from the backend's Markdown output
+    - An interactive Plotly probability distribution chart across all four classes
+    - An expandable AI Explanation panel rendered from the backend's Markdown output
   - **History** — browse previously analyzed scans in a paginated grid, each with its thumbnail, prediction badge, confidence, AI explanation, and a delete option
 - Friendly, non-crashing error handling for backend downtime, timeouts, and invalid responses
-- Full evaluation suite — classification report, confusion matrix, and multi-class ROC/AUC curves
+- Full evaluation suite: classification report, confusion matrix, and multi-class ROC/AUC curves
 
 ---
 
-## 🧬 Model Architecture
+## Model Architecture
 
 | Component | Details |
 |---|---|
 | Base model | VGG16 (`include_top=False`, ImageNet weights) |
-| Input size | 128 × 128 × 3 |
+| Input size | 128 x 128 x 3 |
 | Trainable layers | Base frozen; head layers trainable |
-| Head | Flatten → Dropout(0.3) → Dense(128, ReLU) → Dropout(0.2) → Dense(4, Softmax) |
+| Head | Flatten -> Dropout(0.3) -> Dense(128, ReLU) -> Dropout(0.2) -> Dense(4, Softmax) |
 | Optimizer | Adam (lr = 0.0001) |
 | Loss | Sparse Categorical Crossentropy |
 | Metric | Sparse Categorical Accuracy |
@@ -62,9 +65,9 @@ MRI-based brain tumor diagnosis is time-consuming and requires expert radiologic
 
 ---
 
-## 📊 Results
+## Results
 
-**Training performance:** reached **94.82% training accuracy** with a final loss of **0.1388** after 20 epochs.
+**Training performance:** reached 94.82% training accuracy with a final loss of 0.1388 after 20 epochs.
 
 **Test set classification report (1,600 test images):**
 
@@ -91,7 +94,7 @@ The confusion matrix and ROC curve are available in the training notebook (`main
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 MONCO/
@@ -128,7 +131,8 @@ MONCO/
 │   │   │   ├── __init__.py
 │   │   │   ├── prediction_service.py # Orchestrates prediction + LLM explanation + history save
 │   │   │   ├── history_service.py     # DB queries for saving/listing/deleting history records
-│   │   │   └── file_service.py         # Saves uploaded MRI images to disk
+│   │   │   ├── file_service.py         # Saves uploaded MRI images to disk (local/dev fallback)
+│   │   │   └── cloudinary_service.py    # Uploads prediction images to Cloudinary, returns secure URL
 │   │   │
 │   │   ├── __init__.py
 │   │   ├── main.py                # FastAPI entrypoint, creates DB tables, mounts /uploads
@@ -174,30 +178,83 @@ MONCO/
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 - **Deep Learning:** TensorFlow, Keras, VGG16
 - **Backend:** FastAPI
 - **Database:** MySQL, SQLAlchemy (ORM), PyMySQL (driver)
-- **Explanation Generation:** [Ollama](https://ollama.com) running **gemma3:4b** locally for natural language prediction explanations
+- **Image Storage:** Cloudinary (persistent storage for uploaded MRI scans, used by both prediction and history retrieval)
+- **Explanation Generation:** [Ollama](https://ollama.com) running gemma3:4b locally for natural language prediction explanations
 - **Frontend:** Streamlit, Plotly
 - **Data & Evaluation:** NumPy, scikit-learn, Seaborn, Matplotlib
 - **Image Processing:** Pillow (PIL)
+- **Hosting:** Render (FastAPI backend), Streamlit Community Cloud (frontend), Aiven (managed MySQL)
 
 ---
 
-## 🚀 Getting Started
+## Cloudinary Integration
+
+Uploaded MRI images were originally saved to local disk on the backend server. This worked fine during local development, but broke down once the backend was deployed to a hosted platform: Render's free-tier instances use an ephemeral filesystem, so every redeploy or restart wiped the `uploads/` directory. Existing history records would still reference an image path, but the underlying file no longer existed, breaking thumbnails in the History tab.
+
+To fix this, image storage was moved to **Cloudinary**, which stores each uploaded scan externally and returns a permanent, secure URL that survives redeploys, restarts, and scaling events.
+
+**Changes made:**
+
+- Added Cloudinary configuration via environment variables (cloud name, API key, API secret)
+- Created a `CloudinaryService` responsible for uploading images and returning the secure URL
+- Updated `PredictionService` to upload each prediction image to Cloudinary as part of the prediction flow, instead of writing it to local disk
+- The database now stores the Cloudinary secure URL in place of a local file path, and both `/predict` and `/history` responses serve images directly from Cloudinary
+- Added the `cloudinary` dependency to `requirements.txt`
+
+Required environment variables for this feature (added alongside the MySQL variables in `.env`):
+
+```
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+---
+
+## Deployment
+
+MONCO is deployed as two independent services, backed by a managed cloud database:
+
+| Layer | Platform | Notes |
+|---|---|---|
+| Backend (FastAPI) | [Render](https://render.com) | Free-tier web service; spins down after inactivity, so the first request after idling can take up to ~50 seconds |
+| Database (MySQL) | [Aiven](https://aiven.io) | Managed, hosted MySQL instance used in place of a local database in production |
+| Image storage | [Cloudinary](https://cloudinary.com) | Persistent storage for uploaded MRI scans and history thumbnails |
+| Frontend (Streamlit) | [Streamlit Community Cloud](https://streamlit.io/cloud) | Points at the Render-hosted API URL |
+
+**Live app:** [monco-ai.streamlit.app](https://monco-ai.streamlit.app/)
+
+**Deployment notes and lessons learned:**
+
+- The FastAPI backend was deployed on Render as a Python 3 web service, built directly from the GitHub repository, with automatic deploys on push to `main`
+- Initial deployment surfaced a handful of environment- and startup-related issues on Render's platform, which were debugged by inspecting the live service logs
+- The backend was connected to a hosted Aiven MySQL database in place of a local instance, so prediction history persists independently of the backend's own lifecycle
+- Local disk-based image storage did not hold up in production, since Render's free-tier filesystem is ephemeral and is reset on every redeploy or restart, which led to the Cloudinary integration described above
+- Cloudinary's environment configuration and returned URLs needed additional debugging before images displayed correctly in the Analyze and History tabs
+- The LLM explanation step (Ollama serving gemma3:4b) also required troubleshooting to work reliably in the deployed environment
+- Once the backend, database, image storage, and LLM explanation pipeline were all working together, the Streamlit frontend was deployed to Streamlit Community Cloud, pointed at the live Render API URL
+
+---
+
+## Getting Started
+
+The steps below set up MONCO for local development. A hosted version is already live at [monco-ai.streamlit.app](https://monco-ai.streamlit.app/) if you just want to try it out.
 
 ### 0. Prerequisites: Ollama and MySQL
 
-The AI explanation feature calls a local **Ollama** instance running **gemma3:4b**:
+The AI explanation feature calls a local Ollama instance running gemma3:4b:
 
 ```bash
 ollama pull gemma3:4b
 ollama serve
 ```
 
-The history feature needs a running **MySQL** server with a database created for the app:
+The history feature needs a running MySQL server with a database created for the app:
 
 ```sql
 CREATE DATABASE monco;
@@ -239,6 +296,10 @@ MYSQL_PORT=3306
 MYSQL_DATABASE=monco
 MYSQL_USER=monco_user
 MYSQL_PASSWORD=your_password
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ### 5. Run the FastAPI backend
@@ -263,7 +324,7 @@ The web app will open at `http://localhost:8501`.
 
 ---
 
-## 🔌 API Usage
+## API Usage
 
 ### Predict
 
@@ -290,7 +351,7 @@ curl -X POST "http://localhost:8000/predict" \
     "notumor": 0.01
   },
   "explanation": "## Prediction\n\nThe classifier predicts that the brain MRI shows a high probability of glioma...\n\n## Important Disclaimer\n\nThis AI-generated explanation is for informational purposes only and should not be considered a medical diagnosis.",
-  "image_path": "uploads/8d44fa0e-723a-45b6-aee9-fb09046db5cb.jpg",
+  "image_path": "https://res.cloudinary.com/your_cloud_name/image/upload/v1234567890/monco/8d44fa0e-723a-45b6-aee9-fb09046db5cb.jpg",
   "created_at": "2026-07-24T09:12:41"
 }
 ```
@@ -303,41 +364,42 @@ curl -X POST "http://localhost:8000/predict" \
 
 **Delete a record:** `DELETE /history/{id}`
 
-Each history record includes the same `prediction`, `confidence`, `probabilities`, and `explanation` fields as `/predict`, plus `image_path` (served under `/uploads/...`) and `created_at`.
+Each history record includes the same `prediction`, `confidence`, `probabilities`, and `explanation` fields as `/predict`, plus `image_path` (the Cloudinary secure URL of the stored image) and `created_at`.
 
 ---
 
-## 🧪 How Prediction Works
+## How Prediction Works
 
-1. The uploaded image is resized to 128×128 and converted to a NumPy array.
+1. The uploaded image is resized to 128x128 and converted to a NumPy array.
 2. The array is passed through the trained VGG16-based model.
 3. The class with the highest softmax probability is selected as the prediction, alongside the full probability distribution across all four classes.
-4. `prompt_builder.py` constructs a prompt from the prediction and confidence, which `llm/service.py` sends to a locally running **Ollama** instance (**gemma3:4b**). The model returns a Markdown-formatted natural language explanation covering what the prediction means, how confident the model is, and a disclaimer to consult a medical professional.
-5. The uploaded image is saved to disk and a new row is written to the `prediction_history` table (image path, prediction, confidence, per-class probabilities, and the AI explanation) via `history_service.py`.
-6. If the predicted class is `notumor`, the result is shown as **"No Tumor Detected"**; otherwise it's shown as **"Tumor: <class name>"**, along with the confidence percentage, probability chart, and AI explanation.
-7. The **History** tab in the Streamlit app queries `/history` to display previously analyzed scans, each with its saved image, prediction badge, confidence, and explanation.
+4. `prompt_builder.py` constructs a prompt from the prediction and confidence, which `llm/service.py` sends to a locally running Ollama instance (gemma3:4b). The model returns a Markdown-formatted natural language explanation covering what the prediction means, how confident the model is, and a disclaimer to consult a medical professional.
+5. The uploaded image is uploaded to Cloudinary via `cloudinary_service.py`, and a new row is written to the `prediction_history` table (Cloudinary image URL, prediction, confidence, per-class probabilities, and the AI explanation) via `history_service.py`.
+6. If the predicted class is `notumor`, the result is shown as "No Tumor Detected"; otherwise it's shown as "Tumor: <class name>", along with the confidence percentage, probability chart, and AI explanation.
+7. The History tab in the Streamlit app queries `/history` to display previously analyzed scans, each with its saved image, prediction badge, confidence, and explanation.
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 - Fine-tune deeper VGG16 layers for improved glioma recall
 - Add Grad-CAM visualizations to highlight tumor regions on the MRI
 - Containerize the app with Docker for easier deployment
 - Add authentication so prediction history can be scoped per logged-in user
-- Delete the underlying image file from disk when a history record is deleted
+- Delete the corresponding Cloudinary asset when a history record is deleted
 - Add downloadable PDF reports generated from history records
 - Expand the dataset with more diverse MRI sources to improve generalization
+- Move the backend to a paid Render tier (or an alternative host) to avoid free-tier spin-down delays
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License. Feel free to use, modify, and distribute with attribution.
 
 ---
 
-## 👤 Project Owner
+## Project Owner
 
 **Manabendu Karfa**
 
@@ -347,4 +409,4 @@ This project is licensed under the MIT License. Feel free to use, modify, and di
 
 ---
 
-<p align="center"><i>Built with curiosity, VGG16, and a lot of epochs. 🧠</i></p>
+<p align="center"><i>Built with curiosity, VGG16, and a lot of epochs.</i></p>
